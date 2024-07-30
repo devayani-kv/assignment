@@ -1,11 +1,12 @@
 # Assignment
 How to run the project:
-1) you will need to get an openai API key and a weather API key (get your weather API key from this website: https://www.weatherapi.com/)
+1) You will need to get an openai API key and a weather API key (get your weather API key from this website: https://www.weatherapi.com/)
 2) Set the value of the API keys in the .env file before anything
 3) The audio clip is already present, but feel free to load an audio of your choice. You will have to change the path to the audio in the audio_extract file
 4) Run audio_extract.py first to transcribe the audio
 5) Then run setup_database.py to setup the vector database and push the transcribed text in
 6) Then run main.py
+7) Requirements.text contains the packages required
 
 ## List of deliverables
 1) Explanation of the files
