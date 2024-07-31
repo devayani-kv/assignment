@@ -42,7 +42,7 @@ def return_answer(messages):
                 "type": "function",
                 "function": {
                     "name": "get_current_weather",
-                    "description": "Get the current weather, like temperature, wind speed etc in a given location",
+                    "description": "Get the current weather parameters GIVEN a location, like temperature, wind speed etc in a given location",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -85,16 +85,18 @@ def return_answer(messages):
 
     assistant_message = response.choices[0].message
     #messages.append(assistant_message)
+    try:
+        funcName = assistant_message.to_dict()['tool_calls'][0]['function']['name']
+        funcArg = assistant_message.to_dict()['tool_calls'][0]['function']['arguments']
+        funcArg = json.loads(funcArg)['location']
 
-    funcName = assistant_message.to_dict()['tool_calls'][0]['function']['name']
-    funcArg = assistant_message.to_dict()['tool_calls'][0]['function']['arguments']
-    funcArg = json.loads(funcArg)['location']
+        print('Function being called: ',funcName)
+        print('Arguments being sent to above function :',funcArg)
 
-    print('Function being called: ',funcName)
-    print('Arguments being sent to above function :',funcArg)
-
-    function_to_call = globals()[funcName]
-    result = function_to_call(funcArg)
+        function_to_call = globals()[funcName]
+        result = function_to_call(funcArg)
+    except:
+        result = assistant_message.content
     #print(result)
     return result
 
@@ -119,3 +121,29 @@ messages.append({"role": "user", "content": q2})
 weather_info = return_answer(messages)
 with open('weather_info.json','w') as f:
     json.dump(weather_info,f)
+
+
+with open('weather_info.json','r') as f:
+    data = json.load(f)
+
+temp = data['current']['temp_c']
+print(temp)
+q3 = '''Follow the below instructions:
+        You will be given the temperature in a city in degree celsius, if the temperature is greater than 25 degree celsius
+        it's a hot day, if it's less than 25 degree celsius, its a warm day
+        The city does not matter, only focus on the instructions mentioned above. 
+        Since there is not location mentioned, do not hallucinate a location
+        There are only two options, hot or warm. Return only the answer
+        Temperature: {}
+        
+        Based on the above instructions and the temperature, return whether its a hot day or a warm day'''
+
+q3 = q3.format(temp)
+
+messages = []
+messages.append({"role":"system", "content":"You are a smart assistant with some tools at hand that you will use only if you deem them necessary. You have 2 tools at hand, one to get the exact weather conditions in a place and one to get the description of a place. If you are asked a question that is not related to either of these tools, use your general knowledge to answer it"})
+messages.append({"role": "user", "content": q3})
+
+#print(return_answer(messages))
+temp_info = return_answer(messages)
+print(temp_info)
